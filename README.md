@@ -1,5 +1,7 @@
 # StreamGloss
 
+**English** · [中文](#中文)
+
 Live subtitles in Traditional Chinese for English live streams and videos, running entirely on your own machine.
 
 StreamGloss listens to an audio input, transcribes speech with Whisper, translates each sentence with a local LLM through Ollama, and shows the result in an always-on-top subtitle bar above the stream. No audio or text leaves the computer.
@@ -66,5 +68,47 @@ streamgloss/
 ```
 
 ## License
+
+[Apache-2.0](LICENSE)
+
+---
+
+## 中文
+
+英文直播與影片的即時繁體中文字幕，全程於本機執行。
+
+StreamGloss 擷取音訊輸入，以 Whisper 辨識語音，透過 Ollama 的本地 LLM 逐句翻譯，並將結果顯示於置頂的字幕列。音訊與文字皆不會離開本機。
+
+### 運作方式
+
+各階段在獨立執行緒中執行，以有上限的佇列傳遞工作。當後段處理不及時，新片段會在短暫等待後捨棄，避免字幕與畫面的延遲持續累積。
+
+- **斷句** — Silero VAD 依停頓切分語句，並設有前後緩衝與最大長度，長段發言也能切成易讀的字幕。
+- **語音辨識** — faster-whisper，可設定模型大小、beam search 與領域詞彙提示。
+- **翻譯** — 針對台灣繁體中文的 prompt，並清除模型輸出中的「以下是翻譯」等贅詞與 code fence。
+- **字幕列** — 半透明字幕列，上方顯示中文、下方附英文原文，大小、顏色與位置皆可調整。
+- **結束** — 按下 Ctrl+C 後依序停止各執行緒並釋放 Whisper 模型。
+
+### 需求
+
+- Python 3
+- [Ollama](https://ollama.com) 並下載模型，例如 `ollama pull llama3`
+- 支援 CUDA 的 NVIDIA 顯示卡以達到即時辨識（CPU 可改用較小的模型）
+- PyAudio 所需的 PortAudio（macOS：`brew install portaudio`）
+- 若要擷取系統音訊而非麥克風，需要 loopback 或虛擬音訊裝置
+
+### 使用方式
+
+```bash
+pip install -r requirements.txt
+python main.py [input_device_index] [--no-gui]
+```
+
+- `input_device_index` — 要擷取的 PyAudio 輸入裝置
+- `--no-gui` — 不顯示字幕列，改將翻譯輸出至終端機
+
+所有設定集中於 [`streamgloss/config.py`](streamgloss/config.py) 的 `AppConfig`，包含 Whisper、VAD、Ollama 與字幕列等參數。
+
+### 授權
 
 [Apache-2.0](LICENSE)
