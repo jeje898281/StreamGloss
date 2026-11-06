@@ -14,7 +14,7 @@ flowchart LR
     L -->|display queue| O[Subtitle overlay<br/>Tkinter]
 ```
 
-Each stage runs in its own thread and hands work to the next through bounded queues, so a slow translation never blocks audio capture.
+Each stage runs in its own thread and hands work to the next through bounded queues. When a later stage falls behind, new segments are dropped after a short wait instead of letting the subtitles lag further and further behind the stream.
 
 - **Segmentation** — Silero VAD splits the stream into utterances at pauses, with padding and a maximum length so long monologues are still cut into readable lines.
 - **Transcription** — faster-whisper with a configurable model size, beam search and an initial prompt for domain vocabulary.
